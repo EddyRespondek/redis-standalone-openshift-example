@@ -28,3 +28,29 @@ That's it, you can now checkout your application at:
     http://redis-$yournamespace.rhcloud.com
 
 
+Command Line Tools
+----------------------------
+
+SSH into you application and run command
+
+    export PATH=${OPENSHIFT_RUNTIME_DIR}bin/:$PATH
+
+the following command line tools are now available
+
+    redis-cli
+    redis-server
+    redis-benchmark
+    redis-check-aof
+    redis-check-dump
+
+Running redis-cli will fail on it's default host and port, instead use sockets
+
+    redis-cli -s ${OPENSHIFT_GEAR_DIR}tmp/redis.sock
+
+
+Log File
+----------------------------
+
+To view the redis.log file use command
+
+    rhc app tail -a $APPNAME

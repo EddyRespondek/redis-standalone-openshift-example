@@ -4,36 +4,43 @@
 # before the deploy step.  This script gets executed directly, so it
 # could be python, php, ruby, etc
 
+OPENSHIFT_BIN=${OPENSHIFT_RUNTIME_DIR}bin/
+export PATH=${OPENSHIFT_BIN}:$PATH
+
 REDIS_VERSION=2.4.16
 REDIS_FILE=redis-${REDIS_VERSION}.tar.gz
 REDIS_URL=http://redis.googlecode.com/files/${REDIS_FILE}
-
 REDIS_TMP=${OPENSHIFT_TMP_DIR}redis/
 REDIS_PATH=${OPENSHIFT_DATA_DIR}redis/
 REDIS_DATA=${REDIS_PATH}data/
-REDIS_BIN=${REDIS_PATH}bin/
-REDIS_SERVER=${REDIS_BIN}redis-server
+REDIS_SERVER=${OPENSHIFT_BIN}redis-server
 REDIS_CONF_SRC=${OPENSHIFT_REPO_DIR}redis.conf
-REDIS_CONF_DST=${REDIS_BIN}redis.conf
+REDIS_CONF_DST=${REDIS_PATH}redis.conf
 REDIS_PID=${OPENSHIFT_RUN_DIR}redis.pid
 REDIS_SOCK=${OPENSHIFT_GEAR_DIR}tmp/redis.sock
 REDIS_LOGFILE=${OPENSHIFT_LOG_DIR}redis.log
 
+rm -rf ${REDIS_TMP}
+mkdir ${REDIS_TMP}
+
+wget -nc ${REDIS_URL} -P ${OPENSHIFT_TMP_DIR}
+tar -xvf ${OPENSHIFT_TMP_DIR}${REDIS_FILE} -C ${REDIS_TMP} --strip-components 1
+
+cd ${REDIS_TMP}
+make -C ${REDIS_TMP}
+
+cd ${REDIS_TMP}
+cp -f ${REDIS_TMP}src/{redis-cli,redis-server,redis-benchmark,redis-check-aof,redis-check-dump} ${OPENSHIFT_BIN}
+
 if [ ! -d ${REDIS_PATH} ]; then
-    rm -rf ${REDIS_TMP}
-    mkdir -p {${REDIS_TMP},${REDIS_PATH},${REDIS_DATA}}
-    
-    touch ${REDIS_LOGFILE}
-    
-    wget -nc ${REDIS_URL} -P ${OPENSHIFT_TMP_DIR}
-    tar -xvf ${OPENSHIFT_TMP_DIR}${REDIS_FILE} -C ${REDIS_TMP} --strip-components 1
-    
-    make -e install PREFIX=${REDIS_PATH} -C ${REDIS_TMP}
-    
-    sed -e "s|\$PIDFILE|${REDIS_PID}|g" \
-        -e "s|\$UNIXSOCKET|${REDIS_SOCK}|g" \
-        -e "s|\$LOGFILE|${REDIS_LOGFILE}|g" \
-        -e "s|\$DIR|${REDIS_DATA}|g" ${REDIS_CONF_SRC} > ${REDIS_CONF_DST}
-    
-    [ -f ${REDIS_PID} ] || ${REDIS_SERVER} ${REDIS_BIN}${REDIS_CONF_DST}
+    mkdir -p {${REDIS_PATH},${REDIS_DATA}}
 fi
+
+touch ${REDIS_LOGFILE}
+
+sed -e "s|\$PIDFILE|${REDIS_PID}|g" \
+    -e "s|\$UNIXSOCKET|${REDIS_SOCK}|g" \
+    -e "s|\$LOGFILE|${REDIS_LOGFILE}|g" \
+    -e "s|\$DIR|${REDIS_DATA}|g" ${REDIS_CONF_SRC} > ${REDIS_CONF_DST}
+
+[ -f ${REDIS_PID} ] || ${REDIS_SERVER} ${REDIS_CONF_DST}
