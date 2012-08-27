@@ -20,17 +20,15 @@ REDIS_PID=${OPENSHIFT_RUN_DIR}redis.pid
 REDIS_SOCK=${OPENSHIFT_GEAR_DIR}tmp/redis.sock
 REDIS_LOGFILE=${OPENSHIFT_LOG_DIR}redis.log
 
+cd ${OPENSHIFT_TMP_DIR}
+
 rm -rf ${REDIS_TMP}
 mkdir ${REDIS_TMP}
 
 wget -nc ${REDIS_URL} -P ${OPENSHIFT_TMP_DIR}
 tar -xvf ${OPENSHIFT_TMP_DIR}${REDIS_FILE} -C ${REDIS_TMP} --strip-components 1
 
-cd ${REDIS_TMP}
-make -C ${REDIS_TMP}
-
-cd ${REDIS_TMP}
-cp -f ${REDIS_TMP}src/{redis-cli,redis-server,redis-benchmark,redis-check-aof,redis-check-dump} ${OPENSHIFT_BIN}
+make -e install PREFIX=${OPENSHIFT_RUNTIME_DIR} -C ${REDIS_TMP}
 
 if [ ! -d ${REDIS_PATH} ]; then
     mkdir -p {${REDIS_PATH},${REDIS_DATA}}
