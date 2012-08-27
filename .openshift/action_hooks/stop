@@ -1,0 +1,24 @@
+#!/bin/bash
+# The logic to stop your application should be put in this script.
+
+export PATH=${OPENSHIFT_RUNTIME_DIR}bin/:$PATH
+
+REDISSOCK=${OPENSHIFT_GEAR_DIR}tmp/redis.sock
+EXEC=${OPENSHIFT_RUNTIME_DIR}bin/redis-server
+CLIEXEC=${OPENSHIFT_RUNTIME_DIR}bin/redis-cli
+PIDFILE=${OPENSHIFT_RUN_DIR}redis.pid
+CONF=${OPENSHIFT_DATA_DIR}redis/redis.conf
+
+
+if [ ! -f $PIDFILE ]; then
+    echo "$PIDFILE does not exist, process is not running"
+else
+    PID=$(cat $PIDFILE)
+    echo "Stopping ..."
+    $CLIEXEC -s $REDISSOCK shutdown
+    while [ -x /proc/${PID} ]; do
+        echo "Waiting for Redis to shutdown ..."
+        sleep 1
+    done
+    echo "Redis stopped"
+fi

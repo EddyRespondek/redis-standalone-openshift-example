@@ -1,5 +1,5 @@
-MoinMoin on OpenShift
-=====================
+Redis on OpenShift
+==================
 
 This git repository helps you get up and running quickly with Redis on OpenShift.
 
