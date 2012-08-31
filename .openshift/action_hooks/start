@@ -5,14 +5,4 @@
 
 export PATH=${OPENSHIFT_RUNTIME_DIR}bin/:$PATH
 
-EXEC=${OPENSHIFT_RUNTIME_DIR}bin/redis-server
-PIDFILE=${OPENSHIFT_RUN_DIR}redis.pid
-CONF=${OPENSHIFT_DATA_DIR}redis/redis.conf
-
-
-if [ -f $PIDFILE ]; then
-    echo "$PIDFILE exists, process is already running or crashed"
-else
-    echo "Starting Redis server..."
-    $EXEC $CONF
-fi
+redis start
