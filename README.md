@@ -37,15 +37,16 @@ SSH into you application and run command
 
 the following command line tools are now available
 
+    redis {start|stop}
     redis-cli
     redis-server
     redis-benchmark
     redis-check-aof
     redis-check-dump
 
-Running redis-cli will fail on it's default host and port, instead use sockets
+Redis server listens on port 16000. So the correct command to run Redis CLI is
 
-    redis-cli -s ${OPENSHIFT_GEAR_DIR}tmp/redis.sock
+    redis-cli -p 16000
 
 
 Log File
